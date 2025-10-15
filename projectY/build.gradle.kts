@@ -31,6 +31,7 @@ dependencies {
     // 🔐 Security (login, JWT, form auth)
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
     // 📊 Actuator (theo dõi health, metrics)
     implementation("org.springframework.boot:spring-boot-starter-actuator")

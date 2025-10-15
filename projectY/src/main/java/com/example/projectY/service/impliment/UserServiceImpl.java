@@ -40,19 +40,19 @@ public class UserServiceImpl implements UserService{
             throw new NoSuchElementException("User not found");
         }
         User currentUser = optionalUser.get();
-        if (updateUser.getUsername() != "") {
+        if (updateUser.getUsername() != null) {
             currentUser.setUsername(updateUser.getUsername());
         }
 
-        if (updateUser.getEmail() != "") {
+        if (updateUser.getEmail() != null) {
             currentUser.setEmail(updateUser.getEmail());
         }
 
-        if (updateUser.getPassword() != "") {
+        if (updateUser.getPassword() != null) {
             currentUser.setPassword(updateUser.getPassword());
         }
 
-        return currentUser;
+        return this.userRepository.save(currentUser);
     }
 
     public String deleteUser(Long id) {
