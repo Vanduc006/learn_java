@@ -1,2 +1,0 @@
-dev SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
-test SPRING_PROFILES_ACTIVE=test ./mvnw spring-boot:run
