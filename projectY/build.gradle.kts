@@ -1,7 +1,8 @@
 plugins {
-	java
+	id("java")
 	id("org.springframework.boot") version "3.5.6"
 	id("io.spring.dependency-management") version "1.1.7"
+    id("io.freefair.lombok") version "9.0.0"
 }
 
 group = "com.example"
@@ -46,7 +47,10 @@ dependencies {
 	// DB
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("com.mysql:mysql-connector-j")
-	
+
+    // Filter
+    compileOnly("com.turkraft.springfilter:jpa:3.2.1")
+    
 }
 
 
