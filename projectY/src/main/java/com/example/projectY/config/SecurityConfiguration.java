@@ -6,7 +6,6 @@ import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +21,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -78,6 +76,15 @@ public class SecurityConfiguration {
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, SecurityUtil.JWT_ALGORITHM.getName());
     }
 
+    String[] whiteList = {
+        "/",
+        "/api/v1/auth/login",
+        "/api/v1/auth/refresh",
+        "/api/v1/storage/**",
+        "/api/v1/jobs/**",
+        "/api/v1/companies/**"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationEntryPoint customAuthEP) throws Exception {
         http
@@ -85,7 +92,7 @@ public class SecurityConfiguration {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> 
                 authz
-                .requestMatchers("/","/api/v1/auth/login","/api/v1/auth/refresh").permitAll()
+                .requestMatchers(whiteList).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer((oath2) -> oath2.jwt(Customizer.withDefaults())

@@ -1,4 +1,4 @@
-package com.example.projectY.response;
+package com.example.projectY.response.user;
 
 import java.time.Instant;
 
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Data
-public class ResUpdateUserDTO {
+public class ResCreateUserDTO {
     private Long id;
     private String username;
     private String email;
@@ -19,10 +19,12 @@ public class ResUpdateUserDTO {
     private GenerEnum gender; // enum
     private String address;
 
-    private Instant updatedAt;
-    private String updatedBy;
-
+    private Instant createdAt;
+    private String createdBy;
     private CompanyUserDTO companyUser;
 
-    public ResUpdateUserDTO() {}
+    private RoleUserDTO roleUser;
+
+    public ResCreateUserDTO() {};
+
 }

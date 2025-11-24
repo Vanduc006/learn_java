@@ -1,20 +1,20 @@
 package com.example.projectY.entity;
 
 import java.time.Instant;
+import java.util.List;
 
 import com.example.projectY.utils.SecurityUtil;
-import com.example.projectY.utils.constants.StatusEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -23,40 +23,37 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
 @Data
-@Table(name = "resumes")
-@Entity
-public class Resume {
+@Table(name = "permissons")
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @NotBlank(message = "Invalid email")
-    private String email;
 
-    private String url;
-
-    @Enumerated(EnumType.STRING)
-    private StatusEnum status;
+    @NotBlank(message = "Invalid permisson name")
+    private String name;
+    private String apiPath;
+    private String method;
+    private String moudle;
 
     private Instant createdAt;
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
 
-    // 1 job have n resume
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id")
-    private Job job;
+    // @ManyToMany(fetch = FetchType.LAZY)
+    // @JsonIgnoreProperties(value = {"permissons"})
+    // @JoinTable(name = "permisson_role", 
+    // joinColumns = @JoinColumn(name = "permisson_id"), 
+    // inverseJoinColumns = @JoinColumn(name = "role_id"))
+    // private List<Role> roles;
 
-    // 1 user have n resume
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    public Resume() {}
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "permissions")
+    @JsonIgnore
+    private List<Role> roles;
 
     @PrePersist
     public void handleBeforeCreated() {

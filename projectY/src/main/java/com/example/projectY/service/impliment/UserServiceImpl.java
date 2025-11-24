@@ -1,7 +1,5 @@
 package com.example.projectY.service.impliment;
 
-import java.io.IOException;
-import java.lang.foreign.Linker.Option;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -16,11 +14,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.example.projectY.entity.Company;
+import com.example.projectY.entity.Resume;
+import com.example.projectY.entity.Role;
 import com.example.projectY.entity.User;
 import com.example.projectY.repository.CompanyRepository;
+import com.example.projectY.repository.ResumeRepository;
+import com.example.projectY.repository.RoleRepository;
 import com.example.projectY.repository.UserRepository;
-import com.example.projectY.response.CompanyUserDTO;
-import com.example.projectY.response.ResCreateUserDTO;
+import com.example.projectY.response.user.CompanyUserDTO;
+import com.example.projectY.response.user.RoleUserDTO;
+import com.example.projectY.service.ResumeService;
 import com.example.projectY.service.UserService;
 
 @Service
@@ -29,6 +32,13 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    // @Autowired ResumeService resumeService;
+    @Autowired
+    private ResumeRepository resumeRepository;
+
+    @Autowired 
+    private RoleRepository roleRepository;
 
     @Override
     public User getUserByEmail(String email) {
@@ -111,7 +121,7 @@ public class UserServiceImpl implements UserService{
         //     currentUser.setUpdatedBy(updateUser.getUpdatedBy());
         // }
 
-        BeanUtils.copyProperties(updateUser, currentUser, "id");
+        BeanUtils.copyProperties(updateUser, currentUser, "id", "createdAt", "createdBy");
         return this.userRepository.save(currentUser);
     }
 
@@ -121,6 +131,14 @@ public class UserServiceImpl implements UserService{
         if (!optionalUser.isPresent()) {
             throw new NoSuchElementException("User not found");
         }
+        if (optionalUser.isPresent()) {
+            // this.resumeService.deleteResumeByUser(optionalUser.get());
+            List<Resume> currentList = this.resumeRepository.findByUser(optionalUser.get());
+            this.resumeRepository.deleteAll(currentList);
+
+            // optionalUser.get().getRole()
+        }
+
         User currentUser = optionalUser.get();
         this.userRepository.deleteById(currentUser.getId());
         return "Delete user with Id" + currentUser.getId();
@@ -183,5 +201,34 @@ public class UserServiceImpl implements UserService{
     public void deleteUserByCompany(Company company) {
         List<User> userList = this.userRepository.findByCompany(company);
         this.userRepository.deleteAll(userList);
+    }
+
+    public Boolean handleValidUser(Long id) {
+        Optional<Company> optionalCompany = this.companyRepository.findById(id);
+        return optionalCompany.isPresent();
+    }
+
+    public List<User> handleValidUsers(List<User> list) {
+        List<User> validList = list.stream()
+        .map(user -> this.userRepository.findById(user.getId()))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .toList();
+
+        return validList;
+    }
+
+    public RoleUserDTO handleRoleUserDTO(Long id) {
+        Optional<Role> optionalRole= this.roleRepository.findById(id);
+        if (!optionalRole.isPresent()) {
+            throw new NoSuchElementException("Role not found");
+        }
+        RoleUserDTO roleUserDTO = new RoleUserDTO();
+        BeanUtils.copyProperties(optionalRole.get(), roleUserDTO);
+        return roleUserDTO;
+    }
+
+    public void deleteUserByRole(Role role) {
+        this.userRepository.deleteAll(this.userRepository.findByRole(role));
     }
 }

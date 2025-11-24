@@ -1,6 +1,5 @@
 package com.example.projectY.response;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

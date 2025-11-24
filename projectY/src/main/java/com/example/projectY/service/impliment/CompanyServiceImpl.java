@@ -1,6 +1,5 @@
 package com.example.projectY.service.impliment;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -9,12 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import com.example.projectY.controller.CompanyController;
 import com.example.projectY.entity.Company;
-import com.example.projectY.entity.User;
 // import com.example.projectY.entity.Companies;
 import com.example.projectY.repository.CompanyRepository;
-import com.example.projectY.repository.UserRepository;
 import com.example.projectY.service.CompanyService;
 import com.example.projectY.service.UserService;
 

@@ -4,23 +4,23 @@ import java.time.LocalDateTime;
 
 // import org.springframework.http.HttpStatus;
 
-public class ApiResponeDTO <T> {
-    private ResponeStatusDTO status;
+public class ApiResponseDTO <T> {
+    private ResponseStatusDTO status;
     private T data;
     private LocalDateTime timeStamp = LocalDateTime.now();
 
-    public ApiResponeDTO() {}
+    public ApiResponseDTO() {}
 
-    public ApiResponeDTO(ResponeStatusDTO status, T data, LocalDateTime timeStamp) {
+    public ApiResponseDTO(ResponseStatusDTO status, T data, LocalDateTime timeStamp) {
         this.status = status;
         this.data = data;
         this.timeStamp = timeStamp;
     }
 
-    public ResponeStatusDTO getStatus() {
+    public ResponseStatusDTO getStatus() {
         return status;
     }
-    public void setStatus(ResponeStatusDTO status) {
+    public void setStatus(ResponseStatusDTO status) {
         this.status = status;
     }
     public T getData() {

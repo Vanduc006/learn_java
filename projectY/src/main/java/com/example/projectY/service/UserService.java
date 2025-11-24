@@ -1,19 +1,16 @@
 package com.example.projectY.service;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 
 import com.example.projectY.entity.Company;
+import com.example.projectY.entity.Role;
 import com.example.projectY.entity.User;
-import com.example.projectY.repository.UserRepository;
-import com.example.projectY.response.CompanyUserDTO;
-import com.example.projectY.response.ResCreateUserDTO;
+import com.example.projectY.response.user.CompanyUserDTO;
+import com.example.projectY.response.user.RoleUserDTO;
 
 public interface UserService {
     public Page<User> getAllUser(Pageable pageable); // Read
@@ -41,4 +38,12 @@ public interface UserService {
     public CompanyUserDTO handleCompanyUser(Long id);
 
     public void deleteUserByCompany(Company company);
+
+    public Boolean handleValidUser(Long id);
+
+    public List<User> handleValidUsers(List<User> list);
+
+    public RoleUserDTO handleRoleUserDTO(Long id); // role id
+
+    public void deleteUserByRole(Role role);
 }

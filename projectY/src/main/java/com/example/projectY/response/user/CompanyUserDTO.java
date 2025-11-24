@@ -1,4 +1,4 @@
-package com.example.projectY.response;
+package com.example.projectY.response.user;
 
 import lombok.Data;
 import lombok.Getter;

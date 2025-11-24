@@ -26,9 +26,19 @@ public class ResLoginDTO {
         private Long id;
         private String username;
         private String email;
+        private RoleUserLoginDTO role;
 
         public UserLoginDTO() {};
 
+        @Getter
+        @Setter
+        @Data
+        public static class RoleUserLoginDTO {
+            private Long id;
+            private String name;
+
+            public RoleUserLoginDTO() {}
+        }
     }
 
     @Getter

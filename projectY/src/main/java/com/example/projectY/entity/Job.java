@@ -4,8 +4,9 @@ import java.time.Instant;
 import java.util.List;
 
 import com.example.projectY.utils.SecurityUtil;
-import com.example.projectY.utils.constants.GenerEnum;
+import com.example.projectY.utils.constants.LevelEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,84 +17,66 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "jobs")
 @Getter
 @Setter
-@Data
-public class User { 
+public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Invalid name")
-    private String username;
+    @NotBlank(message = "Invalid job name")
+    private String name;
 
-    // @NotBlank(message = "Blank")
-    @Email
-    // @Pattern(Flag = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\\\.[A-Z]{2,6}$")
-    private String email;
+    private String location;
+    private double salary;
+    private int quantity;
 
-    @NotBlank(message = "Invalid password")
-    private String password;
-
-    private Integer age;
     @Enumerated(EnumType.STRING)
-    private GenerEnum gender; // enum
-    private String address;
+    private LevelEnum level;
 
     @Column(columnDefinition = "MEDIUMTEXT")
-    private String refreshToken;
-    
+    private String description;
+    private Instant startDate;
+    private Instant endDate;
+    private Boolean active;
+
     private Instant createdAt;
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
 
-    // 1 company have n user
+    // 1 company have n job
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id") // foreign key -> companies.id
-    private Company company; // id
+    @JoinColumn(name = "company_id")
+    private Company company;
 
-    // 1 user have n resume
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    // n job have n skill
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties(value = {"jobs"})
+    @JoinTable(name = "job_skill",
+    joinColumns = @JoinColumn(name = "job_id"), 
+    inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    private List<Skill> skills;
+
+    // 1 job have n resume
+    @OneToMany(mappedBy = "job", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Resume> resumes;
-    
-    // 1 role have n user
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    private Role role;
 
-    public User() {}
-
-    // public User(Long id, @NotBlank(message = "Invalid name") String username, @Email String email,
-    //         @NotBlank(message = "Invalid password") String password, int age, String gender, String address,
-    //         String refreshToken, Instant createdAt, Instant updatedAt, String createdBy, String updatedBy) {
-    //     this.id = id;
-    //     this.username = username;
-    //     this.email = email;
-    //     this.password = password;
-    //     this.age = age;
-    //     this.gender = gender;
-    //     this.address = address;
-    //     this.refreshToken = refreshToken;
-    //     this.createdAt = createdAt;
-    //     this.updatedAt = updatedAt;
-    //     this.createdBy = createdBy;
-    //     this.updatedBy = updatedBy;
-    // }
+    public Job() {}
 
     @PrePersist
     public void handleBeforeCreated() {
@@ -110,5 +93,4 @@ public class User {
         SecurityUtil.getCurrentUserLogin().get() : "anon";
     }
     
-
 }

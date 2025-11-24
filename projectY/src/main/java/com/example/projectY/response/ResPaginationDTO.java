@@ -2,8 +2,6 @@ package com.example.projectY.response;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;

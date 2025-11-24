@@ -1,14 +1,9 @@
 package com.example.projectY.controller;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -20,18 +15,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.projectY.entity.Company;
-import com.example.projectY.response.ApiResponeDTO;
+import com.example.projectY.response.ApiResponseDTO;
 import com.example.projectY.response.MetaDTO;
 import com.example.projectY.response.ResPaginationDTO;
-import com.example.projectY.response.ResponeStatusDTO;
+import com.example.projectY.response.ResponseStatusDTO;
 import com.example.projectY.service.CompanyService;
-import com.example.projectY.utils.annotations.ApiAnnotation;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
@@ -42,15 +33,12 @@ public class CompanyController {
     @Autowired
     private CompanyService companyService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @PostMapping("/companies")
-    public ResponseEntity<ApiResponeDTO<?>> createCompany(
+    public ResponseEntity<ApiResponseDTO<?>> createCompany(
         @Valid @RequestBody Company newCompany
     ) {
-        ResponeStatusDTO status = new ResponeStatusDTO(HttpStatus.CREATED, "Create company");
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponeDTO<>(status, this.companyService.handleCreateCompanies(newCompany),LocalDateTime.now()));
+        ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.CREATED, "Create company");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(status, this.companyService.handleCreateCompanies(newCompany),LocalDateTime.now()));
     }
 
     // @GetMapping("/companies")
@@ -80,13 +68,13 @@ public class CompanyController {
     // }
     @GetMapping("/companies")
     // @ApiAnnotation("test annotaion")
-    public ResponseEntity<ApiResponeDTO<ResPaginationDTO<Company, MetaDTO>>> getAllCompany(
+    public ResponseEntity<ApiResponseDTO<ResPaginationDTO<Company, MetaDTO>>> getAllCompany(
         @Filter Specification<Company> comapnySpecification,
         Pageable companyPageable
     ) {
         
         Page<Company> currentPage = this.companyService.handleFilterCompany(comapnySpecification, companyPageable);
-        ResponeStatusDTO status = new ResponeStatusDTO(HttpStatus.OK, "Get all companies");
+        ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.OK, "Get all companies");
         // status.setStatusMessage().get;
 
         MetaDTO meta = new MetaDTO();
@@ -99,27 +87,27 @@ public class CompanyController {
         format.setResult(currentPage.getContent());
         format.setMeta(meta);
 
-        return ResponseEntity.ok().body(new ApiResponeDTO<>(status, format, LocalDateTime.now()));
+        return ResponseEntity.ok().body(new ApiResponseDTO<>(status, format, LocalDateTime.now()));
     }
 
     @PutMapping("/companies/{id}")
-    public ResponseEntity<ApiResponeDTO<Company>> updateCompany(
+    public ResponseEntity<ApiResponseDTO<Company>> updateCompany(
         @PathVariable("id") Long id,
         @RequestBody Company updateCompany
     ) {
-        ResponeStatusDTO status = new ResponeStatusDTO(HttpStatus.OK, "Update company");
+        ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.OK, "Update company");
 
-        return ResponseEntity.ok().body(new ApiResponeDTO<>(status, this.companyService.handleUpdateCompanies(id, updateCompany), LocalDateTime.now()));
+        return ResponseEntity.ok().body(new ApiResponseDTO<>(status, this.companyService.handleUpdateCompanies(id, updateCompany), LocalDateTime.now()));
     }
 
     @DeleteMapping("/companies/{id}")
-    public ResponseEntity<ApiResponeDTO<?>> deleteCompany(
+    public ResponseEntity<ApiResponseDTO<?>> deleteCompany(
         @PathVariable("id") Long id
     ) {
         Company company = this.companyService.handleGetCompanyById(id);
         this.companyService.handleDeleteCompanies(company.getId());
-        ResponeStatusDTO status = new ResponeStatusDTO(HttpStatus.OK, "Delete company");
-        return ResponseEntity.ok().body(new ApiResponeDTO<>(status, null, LocalDateTime.now()));
+        ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.OK, "Delete company");
+        return ResponseEntity.ok().body(new ApiResponseDTO<>(status, null, LocalDateTime.now()));
     }
 
     

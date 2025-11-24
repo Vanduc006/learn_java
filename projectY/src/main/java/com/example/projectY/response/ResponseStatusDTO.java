@@ -2,11 +2,11 @@ package com.example.projectY.response;
 
 import org.springframework.http.HttpStatus;
 
-public class ResponeStatusDTO {
+public class ResponseStatusDTO {
     private HttpStatus statusCode;
     private String statusMessage;
 
-    public ResponeStatusDTO(HttpStatus statusCode, String statusMessage) {
+    public ResponseStatusDTO(HttpStatus statusCode, String statusMessage) {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
     }
