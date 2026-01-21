@@ -1,6 +1,8 @@
 package com.example.projectY.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,9 +29,12 @@ import com.example.projectY.request.ReqLoginDTO;
 import com.example.projectY.response.ApiResponseDTO;
 import com.example.projectY.response.ResLoginDTO;
 import com.example.projectY.response.ResponseStatusDTO;
+import com.example.projectY.response.user.ResCreateUserDTO;
 import com.example.projectY.response.ResLoginDTO.GetUserDTO;
+import com.example.projectY.response.ResLoginDTO.UserInsideToken;
 import com.example.projectY.response.ResLoginDTO.UserLoginDTO;
 import com.example.projectY.response.ResLoginDTO.UserLoginDTO.RoleUserLoginDTO;
+import com.example.projectY.response.ResLoginDTO.UserLoginDTO.RoleUserLoginDTO.PermissionRoleUserLoginDTO;
 import com.example.projectY.service.UserService;
 import com.example.projectY.utils.SecurityUtil;
 
@@ -49,8 +55,11 @@ public class AuthController {
     @Value("${projectY.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpriration;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @PostMapping("/auth/login")
-    public ResponseEntity<ApiResponseDTO<ResLoginDTO>> login(
+    public ResponseEntity<ApiResponseDTO<?>> login(
         @Valid
         @RequestBody ReqLoginDTO loginDTO
     ) {
@@ -60,13 +69,40 @@ public class AuthController {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         // Create token
         
+        // User entity
         User currentUser = this.userService.getUserByEmail(loginDTO.getUsername());
+        // Permission login DTO
+        List<ResLoginDTO.UserLoginDTO.RoleUserLoginDTO.PermissionRoleUserLoginDTO> permissions = new ArrayList<ResLoginDTO.UserLoginDTO.RoleUserLoginDTO.PermissionRoleUserLoginDTO>();
+        if (currentUser.getRole() != null) {
+            if (currentUser.getRole().getPermissions() != null) {
+                permissions = currentUser.getRole().getPermissions()
+                .stream().map(permisson -> {
+                    ResLoginDTO.UserLoginDTO.RoleUserLoginDTO.PermissionRoleUserLoginDTO permissonLoginDTO = new PermissionRoleUserLoginDTO();
+                    BeanUtils.copyProperties(permisson, permissonLoginDTO);
+                    return permissonLoginDTO;
+                }).toList();
+            }
+        }
+
+
+        // Role login DTO
         ResLoginDTO.UserLoginDTO.RoleUserLoginDTO roleUserLoginDTO = new RoleUserLoginDTO();
-        BeanUtils.copyProperties(currentUser.getRole(), roleUserLoginDTO);
+        if (currentUser.getRole() != null) {
+            BeanUtils.copyProperties(currentUser.getRole(), roleUserLoginDTO);
+            roleUserLoginDTO.setPermissions(permissions);
+        }
 
         ResLoginDTO.UserLoginDTO userLoginDTO = new ResLoginDTO.UserLoginDTO();
+        // if (currentUser.getRole() != null) {
         BeanUtils.copyProperties(currentUser, userLoginDTO);
         userLoginDTO.setRole(roleUserLoginDTO);
+            // userLoginDTO.setRole(currentUser.getRole());
+        // }
+
+        // currentUser.getRole().getPermissions()
+
+        ResLoginDTO.UserInsideToken userInsideToken = new UserInsideToken();
+        BeanUtils.copyProperties(userLoginDTO, userInsideToken);
 
         String accessToken = this.securityUtil.createAccessToken(authentication.getName(), userLoginDTO);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -88,7 +124,8 @@ public class AuthController {
         .maxAge(refreshTokenExpriration)
         .build();
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString() ).body(new ApiResponseDTO<ResLoginDTO>(status, new ResLoginDTO(accessToken, userLoginDTO), LocalDateTime.now()));
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString() )
+        .body(new ApiResponseDTO<>(status, new ResLoginDTO(accessToken, userLoginDTO), null));
         
     }
 
@@ -121,11 +158,35 @@ public class AuthController {
         System.out.println(email);
 
         User currentUser = this.userService.getUserByEmail(email);
-        ResLoginDTO.UserLoginDTO userLoginDTO = new UserLoginDTO();
-        BeanUtils.copyProperties(currentUser, userLoginDTO);
+        
+        // Permission login DTO
+        List<ResLoginDTO.UserLoginDTO.RoleUserLoginDTO.PermissionRoleUserLoginDTO> permissions = new ArrayList<ResLoginDTO.UserLoginDTO.RoleUserLoginDTO.PermissionRoleUserLoginDTO>();
+        if (currentUser.getRole().getPermissions() != null) {
+            permissions = currentUser.getRole().getPermissions()
+            .stream().map(permisson -> {
+                ResLoginDTO.UserLoginDTO.RoleUserLoginDTO.PermissionRoleUserLoginDTO permissonLoginDTO = new PermissionRoleUserLoginDTO();
+                BeanUtils.copyProperties(permisson, permissonLoginDTO);
+                return permissonLoginDTO;
+            }).toList();
+        }
+
+        // Role login DTO
+        ResLoginDTO.UserLoginDTO.RoleUserLoginDTO roleUserLoginDTO = new RoleUserLoginDTO();
+        if (currentUser.getRole() != null) {
+            BeanUtils.copyProperties(currentUser.getRole(), roleUserLoginDTO);
+            roleUserLoginDTO.setPermissions(permissions);
+        }
+
+        ResLoginDTO.UserLoginDTO userLoginDTO = new ResLoginDTO.UserLoginDTO();
+        if (currentUser.getRole() != null) {
+            BeanUtils.copyProperties(currentUser, userLoginDTO);
+            userLoginDTO.setRole(roleUserLoginDTO);
+            // userLoginDTO.setRole(currentUser.getRole());
+        }
         
         ResLoginDTO.GetUserDTO getUserDTO = new GetUserDTO();
         getUserDTO.setUser(userLoginDTO);
+
 
         ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.OK, "Get auth user");
 
@@ -147,6 +208,8 @@ public class AuthController {
         ResLoginDTO.UserLoginDTO userLoginDTO = new UserLoginDTO();
         BeanUtils.copyProperties(this.userService.getUserByEmail(decodeToken.getSubject()),userLoginDTO);
 
+        ResLoginDTO.UserInsideToken userInsideToken = new UserInsideToken();
+        BeanUtils.copyProperties(userLoginDTO, userInsideToken);
         String accessToken = this.securityUtil.createAccessToken(decodeToken.getSubject(), userLoginDTO);
 
         // create refresh token
@@ -165,5 +228,17 @@ public class AuthController {
         .build();
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(new ApiResponseDTO<>(status, userLoginDTO, LocalDateTime.now()));
+    }
+
+    @GetMapping("/auth/register")
+    public ResponseEntity<ApiResponseDTO<?>> register(
+        @Valid @RequestBody User newUser
+    ) {
+        String hashPassword = this.passwordEncoder.encode(newUser.getPassword());   
+        newUser.setPassword(hashPassword);
+        ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.CREATED,"Create new user" );
+        ResCreateUserDTO createUserDTO = new ResCreateUserDTO();
+        BeanUtils.copyProperties(this.userService.createUser(newUser), createUserDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(status, createUserDTO,LocalDateTime.now()));
     }
 }

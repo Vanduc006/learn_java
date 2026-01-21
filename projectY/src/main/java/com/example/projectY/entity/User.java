@@ -74,6 +74,7 @@ public class User {
     // 1 role have n user
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
+    // @JsonIgnore
     private Role role;
 
     public User() {}
@@ -95,12 +96,12 @@ public class User {
     //     this.updatedBy = updatedBy;
     // }
 
-    @PrePersist
-    public void handleBeforeCreated() {
-        this.createdAt = Instant.now();
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true ? 
-        SecurityUtil.getCurrentUserLogin().get() : "anon";
-    }
+    // @PrePersist
+    // public void handleBeforeCreated() {
+    //     this.createdAt = Instant.now();
+    //     this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true ? 
+    //     SecurityUtil.getCurrentUserLogin().get() : "anon";
+    // }
 
     @PreUpdate
     public void handleBeforeUpdated() {

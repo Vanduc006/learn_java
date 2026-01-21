@@ -33,12 +33,16 @@ public class RoleServiceImpl implements RoleService {
     // Create
     public Role handleCreateRole(Role newRole) {
         // valid permisson
-        List<Permission> validListPermisson = this.permissionService.handleValidPermissons(newRole.getPermissions());
-        newRole.setPermissions(validListPermisson);
+        if (newRole.getPermissions() != null ) {
+            List<Permission> validListPermisson = this.permissionService.handleValidPermissons(newRole.getPermissions());
+            newRole.setPermissions(validListPermisson);
+        }
         // valid user
-        List<User> validListUser = this.userService.handleValidUsers(newRole.getUsers());
-        newRole.setUsers(validListUser);
-
+        if (newRole.getUsers() != null ) {
+            List<User> validListUser = this.userService.handleValidUsers(newRole.getUsers());
+            newRole.setUsers(validListUser);
+        }
+        
         return this.roleRepository.save(newRole);
     }
     
@@ -56,8 +60,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     // Update
-    public Role handleUpdateRole(Role updateRole) {
-        Optional<Role> optionalRole = this.roleRepository.findById(updateRole.getId());
+    public Role handleUpdateRole(Long id, Role updateRole) {
+        Optional<Role> optionalRole = this.roleRepository.findById(id);
         if (!optionalRole.isPresent()) {
             throw new NoSuchElementException("Role not found");
         }
@@ -84,6 +88,18 @@ public class RoleServiceImpl implements RoleService {
             this.userService.deleteUserByRole(optionalRole.get());
         }
         this.roleRepository.delete(optionalRole.get());
+    }
+
+    public List<Role> handleValidRoles(List<Role> listRoles) {
+        return listRoles.stream()
+        .map(role -> this.roleRepository.findById(role.getId()))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .toList();
+    }
+
+    public Role handleValidRole(Role role) {
+        return this.roleRepository.findById(role.getId()).orElse(null);
     }
 
     // public Boolean handleValidRole(Long id);

@@ -24,7 +24,9 @@ public class GlobalException {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponseDTO<?>> handleInvalidArgument(Exception ex) {
-        ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        // ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid");
+
         return ResponseEntity.internalServerError().body(new ApiResponseDTO<>(status, null, LocalDateTime.now()));
     }
 

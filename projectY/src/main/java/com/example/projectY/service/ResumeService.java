@@ -19,6 +19,8 @@ public interface ResumeService {
 
     public Resume handleGetResumeById(Long id);
 
+    public Page<Resume> handleGetResumeByUser(Pageable resumePageable);
+
     // public void deleteResumeByUser(User user);
 
     // public void deleteResumeByJob(Job job);

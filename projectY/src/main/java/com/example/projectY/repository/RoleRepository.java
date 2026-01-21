@@ -11,4 +11,5 @@ import com.example.projectY.entity.Role;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExecutor<Role> {
     public Optional<Role> findById(Long id);
+    public Optional<Role> findByName(String name);
 }

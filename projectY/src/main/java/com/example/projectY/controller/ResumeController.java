@@ -31,6 +31,7 @@ import com.example.projectY.response.resume.ResGetResumeDTO;
 import com.example.projectY.response.resume.ResGetResumeDTO.JobResumeDTO;
 import com.example.projectY.response.resume.ResGetResumeDTO.UserResumeDTO;
 import com.example.projectY.service.ResumeService;
+import com.example.projectY.utils.SecurityUtil;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
@@ -41,6 +42,7 @@ public class ResumeController {
     
     @Autowired
     private ResumeService resumeService;
+
 
     @PostMapping("/resumes")
     public ResponseEntity<ApiResponseDTO<?>> createResume(
@@ -61,6 +63,8 @@ public class ResumeController {
         @Filter Specification<Resume> resumSpecification,
         Pageable resumePageable
     ) {
+
+
         Page<Resume> currentPage = this.resumeService.handleGetAllResume(resumePageable, resumSpecification);
 
         List<ResGetResumeDTO> resGetResumeDTOs = currentPage.getContent().stream().map(resume -> {
@@ -124,5 +128,44 @@ public class ResumeController {
         this.resumeService.handleDeleteResume(id);
         ResponseStatusDTO statusDTO = new ResponseStatusDTO(HttpStatus.OK, "Delete resume");
         return ResponseEntity.ok().body(new ApiResponseDTO<>(statusDTO, null, LocalDateTime.now()));
+    }
+
+    @PostMapping("/resumes/by-user")
+    public ResponseEntity<ApiResponseDTO<?>> getResumeByUser(
+        Pageable resumePageable
+    ) {
+        Page<Resume> currentPage = this.resumeService.handleGetResumeByUser(resumePageable);
+        
+        List<ResGetResumeDTO> resGetResumeDTOs = currentPage.getContent().stream().map(resume -> {
+            ResGetResumeDTO resGetResumeDTO = new ResGetResumeDTO();
+            BeanUtils.copyProperties(resume, resGetResumeDTO);
+
+            ResGetResumeDTO.UserResumeDTO userResumeDTO = new UserResumeDTO();
+            BeanUtils.copyProperties(resume.getUser(), userResumeDTO);
+            resGetResumeDTO.setUser(userResumeDTO);
+
+            ResGetResumeDTO.JobResumeDTO jobResumeDTO = new JobResumeDTO();
+            BeanUtils.copyProperties(resume.getJob(), jobResumeDTO);
+            resGetResumeDTO.setJob(jobResumeDTO);
+
+            return resGetResumeDTO;
+        }).toList();
+
+        MetaDTO meta = new MetaDTO();
+        meta.setPage(resumePageable.getPageNumber()+1);
+        meta.setPageSize(resumePageable.getPageSize());
+        meta.setPages(currentPage.getTotalPages());
+        meta.setTotal(currentPage.getTotalElements());
+
+        ResPaginationDTO<ResGetResumeDTO, MetaDTO> format = new ResPaginationDTO<ResGetResumeDTO, MetaDTO>();
+        format.setResult(resGetResumeDTOs);
+        format.setMeta(meta);
+
+        return ResponseEntity.ok()
+        .body(new ApiResponseDTO<>(
+            new ResponseStatusDTO(HttpStatus.OK,"Get resumes by user"),
+            format,
+            LocalDateTime.now()
+        ));
     }
 }

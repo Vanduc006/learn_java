@@ -20,37 +20,43 @@ repositories {
 }
 
 dependencies {
-    // ⚙️ Web MVC / REST API
+    //  Web MVC / REST API
     implementation("org.springframework.boot:spring-boot-starter-web")
 
-    // 📦 Validation (Bean Validation API)
+    //  Validation (Bean Validation API)
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    // 🌱 Thymeleaf (template engine)
+    //  Thymeleaf (template engine)
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
-    // 🔐 Security (login, JWT, form auth)
+    //  Security (login, JWT, form auth)
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
-    // 📊 Actuator (theo dõi health, metrics)
+    //  Actuator (theo dõi health, metrics)
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-    // 🔄 Hot reload
+    //  Hot reload
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    // 🧪 Testing
+    //  Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 
 	// DB
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    runtimeOnly("com.mysql:mysql-connector-j")
+    runtimeOnly("com.mysql:mysql-connector-j:8.4.0")
 
     // Filter
     compileOnly("com.turkraft.springfilter:jpa:3.2.1")
+
+    // Mail
+    implementation("org.springframework.boot:spring-boot-starter-mail")
     
+    //Swagger
+    // implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 }
 
 

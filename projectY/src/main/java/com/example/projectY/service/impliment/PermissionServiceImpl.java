@@ -26,8 +26,11 @@ public class PermissionServiceImpl implements PermissionService{
     // private RoleService roleService;
     // Create
     public Permission handleCreatePermission(Permission newPermission) {
-        Optional<Permission> optionalPermisson = this.permissionRepository.findById(newPermission.getId());
-        if (optionalPermisson.isPresent()) {
+
+        if (this.permissionRepository.existsByMoudleAndApiPathAndMethod(newPermission.getMoudle(), newPermission.getApiPath(), newPermission.getMethod())) {
+            throw new DuplicateKeyException("Permisson already exists");
+        }
+        if (this.permissionRepository.existsByName(newPermission.getName())) {
             throw new DuplicateKeyException("Permisson already exists");
         }
         return this.permissionRepository.save(newPermission);
@@ -52,6 +55,13 @@ public class PermissionServiceImpl implements PermissionService{
         if (!optionalPermisson.isPresent()) {
             throw new NoSuchElementException("Permission not found");
         }
+        if (this.permissionRepository.existsByMoudleAndApiPathAndMethod(updatePermission.getMoudle(), updatePermission.getApiPath(), updatePermission.getMethod())) {
+            throw new DuplicateKeyException("Permisson already exists");
+        }
+        if (this.permissionRepository.existsByName(updatePermission.getName())) {
+            throw new DuplicateKeyException("Permisson already exists");
+        }
+        
         Permission currentPermission = optionalPermisson.get();
         BeanUtils.copyProperties(updatePermission, currentPermission, "id", "createdAt", "createdBy");
         return this.permissionRepository.save(currentPermission);

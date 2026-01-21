@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.projectY.entity.Company;
 import com.example.projectY.entity.Resume;
@@ -24,6 +25,7 @@ import com.example.projectY.repository.UserRepository;
 import com.example.projectY.response.user.CompanyUserDTO;
 import com.example.projectY.response.user.RoleUserDTO;
 import com.example.projectY.service.ResumeService;
+import com.example.projectY.service.RoleService;
 import com.example.projectY.service.UserService;
 
 @Service
@@ -42,7 +44,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getUserByEmail(String email) {
-        User currentUser = this.userRepository.findByEmail(email);
+        User currentUser = this.userRepository.findByEmail(email).orElse(null);
         if (currentUser == null) {
             throw new UsernameNotFoundException("Bad crendetials");
         }
@@ -63,6 +65,11 @@ public class UserServiceImpl implements UserService{
         if (newUser.getCompany() != null) {
             
         }
+        if (newUser.getRole() != null) {
+            newUser.setRole(
+                this.roleRepository.findById(newUser.getRole().getId()).orElse(null)
+            );
+        }
 
         return this.userRepository.save(newUser);
     }
@@ -78,6 +85,7 @@ public class UserServiceImpl implements UserService{
         // return optionalUser.map(user -> user);
     }
 
+    @Transactional
     @Override
     public User updateUser(Long id, User updateUser) {
         Optional<User> optionalUser = this.userRepository.findById(id);
@@ -85,42 +93,18 @@ public class UserServiceImpl implements UserService{
         if (!optionalUser.isPresent()) {
             throw new NoSuchElementException("User not found");
         }
+
+        if (updateUser.getCompany() != null) {
+            updateUser.setCompany(this.companyRepository.findById(updateUser.getCompany().getId()).orElse(null));
+        }
+
+        if (updateUser.getRole() != null) {
+            updateUser.setRole(
+                this.roleRepository.findById(updateUser.getRole().getId()).orElse(null)
+            );
+        }
+
         User currentUser = optionalUser.get();
-        // if (updateUser.getUsername() != null) {
-        //     currentUser.setUsername(updateUser.getUsername());
-        // }
-
-        // if (updateUser.getEmail() != null) {
-        //     currentUser.setEmail(updateUser.getEmail());
-        // }
-
-        // if (updateUser.getPassword() != null) {
-        //     currentUser.setPassword(updateUser.getPassword());
-        // }
-
-        // if (updateUser.getAge() != null) {
-        //     currentUser.setAge(updateUser.getAge());
-        // }
-
-        // if (updateUser.getAddress() != null) {
-        //     currentUser.setAddress(updateUser.getAddress());
-        // }
-        // if (updateUser.getRefreshToken() != null) {
-        //     currentUser.setRefreshToken(updateUser.getRefreshToken());
-        // }
-        // if (updateUser.getCreatedAt() != null) {
-        //     currentUser.setCreatedAt(updateUser.getCreatedAt());
-        // }
-        // if (updateUser.getUpdatedAt() != null) {
-        //     currentUser.setUpdatedAt(updateUser.getUpdatedAt());
-        // }
-        // if (updateUser.getCreatedBy() != null) {
-        //     currentUser.setCreatedBy(updateUser.getCreatedBy());
-        // }
-        // if (updateUser.getUpdatedBy() != null) {
-        //     currentUser.setUpdatedBy(updateUser.getUpdatedBy());
-        // }
-
         BeanUtils.copyProperties(updateUser, currentUser, "id", "createdAt", "createdBy");
         return this.userRepository.save(currentUser);
     }

@@ -19,7 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     // @Autowired
     // @Override
     public Optional<User> findById(Long id);
-    public User findByEmail(String email);
+    public Optional<User> findByEmail(String email);
     public boolean existsByEmail(String email);
     public Optional<User> findByRefreshToken(String refreshToken);
     public Optional<User> findByRefreshTokenAndEmail(String refreshToken, String email);

@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 
 import com.example.projectY.response.ResLoginDTO;
+import com.example.projectY.response.ResLoginDTO.UserLoginDTO;
 import com.nimbusds.jose.util.Base64;
 
 @Service
@@ -61,7 +62,7 @@ public class SecurityUtil {
     }
 
 
-    public String createAccessToken(String email, ResLoginDTO.UserLoginDTO userLoginDTO) {
+    public String createAccessToken(String email, UserLoginDTO userLoginDTO) {
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpriration, ChronoUnit.SECONDS);
 
@@ -70,7 +71,11 @@ public class SecurityUtil {
             .issuedAt(now)
             .expiresAt(validity)
             .subject(email)
-            .claim("user", userLoginDTO)
+            // .claim("user", userLoginDTO)
+                .claim("id", userLoginDTO.getId())
+                .claim("username", userLoginDTO.getUsername())
+                .claim("email", userLoginDTO.getEmail())
+
             // .claim("authorities", authentication)
             .build()
         ;
@@ -88,7 +93,7 @@ public class SecurityUtil {
             .issuedAt(now)
             .expiresAt(validity)
             .subject(email)
-            .claim("user", responeLoginDTO.getUserLoginDTO())
+            // .claim("user", responeLoginDTO.getUserLoginDTO())
             .build()
         ;
         

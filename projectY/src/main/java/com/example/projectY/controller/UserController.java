@@ -83,14 +83,12 @@ public class UserController {
             user -> {
                 ResGetUserDTO resGetUserDTO = new ResGetUserDTO();
                 BeanUtils.copyProperties(user, resGetUserDTO);
-                if (user.getCompany().getId() == null) {
-                    resGetUserDTO.setCompanyUser(null);
+                if (user.getCompany() != null) {
+                    resGetUserDTO.setCompanyUser(this.userService.handleCompanyUser(user.getCompany().getId()));
                 }
-                if (user.getRole().getId() == null) {
-                    resGetUserDTO.setRoleUser(null);
-                }
-                resGetUserDTO.setCompanyUser(this.userService.handleCompanyUser(user.getCompany().getId()));
-                // resGetUserDTO.setRoleUser(this.userService.handleRoleUserDTO(user.getRole().getId()));
+                if (user.getRole() != null) {
+                    resGetUserDTO.setRoleUser(this.userService.handleRoleUserDTO(user.getRole().getId()));
+                } 
                 
                 return resGetUserDTO;
             }).toList();
@@ -114,14 +112,14 @@ public class UserController {
         User user = this.userService.getUserById(id);
         ResGetUserDTO getUserDTO = new ResGetUserDTO();
         BeanUtils.copyProperties(user, getUserDTO);
-        if (user.getCompany().getId() == null) {
-            getUserDTO.setCompanyUser(null);
+        if (user.getCompany() != null) {
+            getUserDTO.setCompanyUser(this.userService.handleCompanyUser(user.getCompany().getId()));
         }
-        if (user.getRole().getId() == null) {
-            getUserDTO.setRoleUser(null);
+        if (user.getRole() != null) {
+            getUserDTO.setRoleUser(this.userService.handleRoleUserDTO(user.getRole().getId()));
         } 
         getUserDTO.setCompanyUser(this.userService.handleCompanyUser(user.getCompany().getId()));
-        // getUserDTO.setRoleUser(this.userService.handleRoleUserDTO(user.getRole().getId()));
+        getUserDTO.setRoleUser(this.userService.handleRoleUserDTO(user.getRole().getId()));
 
         // getUserDTO
         return ResponseEntity.ok().body(new ApiResponseDTO<>(status, getUserDTO,LocalDateTime.now()));
@@ -137,29 +135,35 @@ public class UserController {
         ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.CREATED,"Create new user" );
         ResCreateUserDTO createUserDTO = new ResCreateUserDTO();
         BeanUtils.copyProperties(this.userService.createUser(newUser), createUserDTO);
-        createUserDTO.setCompanyUser(this.userService.handleCompanyUser(newUser.getCompany().getId()));
-        // createUserDTO.setRoleUser(this.userService.handleRoleUserDTO(newUser.getRole().getId()));
+        if (newUser.getCompany() != null) {
+            createUserDTO.setCompanyUser(this.userService.handleCompanyUser(newUser.getCompany().getId()));
+        }
+        if (newUser.getRole() != null) {
+            createUserDTO.setRoleUser(this.userService.handleRoleUserDTO(newUser.getRole().getId()));
+        } 
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(status, createUserDTO,LocalDateTime.now()));
     }
 
     @PutMapping("/users/{id}")
     public ResponseEntity<ApiResponseDTO<?>> updateUser(
         @PathVariable("id") Long id,
-        @Valid @RequestBody User updateUser
+        @RequestBody User updateUser
     ) {
         ResponseStatusDTO status = new ResponseStatusDTO(HttpStatus.OK, "Update user by id");
-        User user = this.userService.getUserById(id);
+        User user = this.userService.updateUser(id, updateUser);
         ResUpdateUserDTO resUpdateUserDTO = new ResUpdateUserDTO();
-        BeanUtils.copyProperties(this.userService.updateUser(id, updateUser), resUpdateUserDTO);
+        BeanUtils.copyProperties(
+            user, resUpdateUserDTO
+        );
 
-        if (user.getCompany().getId() == null) {
-            resUpdateUserDTO.setCompanyUser(null);
+        if (user.getCompany() != null) {
+            resUpdateUserDTO.setCompanyUser(this.userService.handleCompanyUser(user.getCompany().getId()));
         }
-        if (user.getRole().getId() == null) {
-            resUpdateUserDTO.setRoleUser(null);
-        }
+        if (user.getRole() != null) {
+            resUpdateUserDTO.setRoleUser(this.userService.handleRoleUserDTO(user.getRole().getId()));
+        } 
         resUpdateUserDTO.setCompanyUser(this.userService.handleCompanyUser(user.getCompany().getId()));
-        // resUpdateUserDTO.setRoleUser(this.userService.handleRoleUserDTO(user.getRole().getId()));
+        resUpdateUserDTO.setRoleUser(this.userService.handleRoleUserDTO(user.getRole().getId()));
         return ResponseEntity.ok().body(new ApiResponseDTO<>(status, resUpdateUserDTO, LocalDateTime.now()));
     }
 

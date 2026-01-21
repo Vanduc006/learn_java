@@ -53,6 +53,7 @@ public class SkillServiceImpl implements SkillService{
         Skill currentSkill = this.skillRepository.findById(id)
         .orElseThrow(() -> new DuplicateKeyException("Skill not found"));
         currentSkill.getJobs().forEach(job -> job.getSkills().remove(currentSkill));
+        currentSkill.getSubscribers().forEach((subscriber -> subscriber.getSkills().remove(currentSkill)));
         
         this.skillRepository.delete(currentSkill);
     } // Delete

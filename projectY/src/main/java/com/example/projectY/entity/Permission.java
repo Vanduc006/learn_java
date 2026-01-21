@@ -44,6 +44,15 @@ public class Permission {
     private String createdBy;
     private String updatedBy;
 
+    public Permission(String name, String apiPath, String method, String moudle) {
+        this.name = name;
+        this.apiPath = apiPath;
+        this.method = method;
+        this.moudle = moudle;
+    }
+
+    public Permission() {};
+
     // @ManyToMany(fetch = FetchType.LAZY)
     // @JsonIgnoreProperties(value = {"permissons"})
     // @JoinTable(name = "permisson_role", 
